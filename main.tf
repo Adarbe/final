@@ -18,3 +18,30 @@ resource "aws_vpc" "final-project" {
 }
 
 data "aws_availability_zones" "available" {}
+
+# resource "tls_private_key" "servers" {
+#   algorithm = "RSA"
+#   rsa_bits  = 4096
+# }
+# resource "aws_key_pair" "servers" {
+#   key_name   = "servers"
+#   public_key = "${tls_private_key.servers.public_key_openssh}"
+# }
+
+# resource "local_file" "servers" {
+# sensitive_content = "${tls_private_key.servers.private_key_pem}"
+#   filename           = "servers.pem"
+# }
+# resource "tls_private_key" "slave" {
+#   algorithm = "RSA"
+#   rsa_bits  = 4096
+# }
+# resource "aws_key_pair" "slaves" {
+#   key_name   = "slave"
+#   public_key = "${tls_private_key.slave.public_key_openssh}"
+# }
+
+# resource "local_file" "slaves" {
+# sensitive_content = "${tls_private_key.slave.private_key_pem}"
+#   filename           = "slave.pem"
+#}

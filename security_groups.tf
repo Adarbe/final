@@ -1,4 +1,5 @@
-resource "aws_default_security_group" "default" {
+resource "aws_security_group" "default" {
+  name = "default-final"
   vpc_id = "${aws_vpc.final-project.id}"
   ingress {
     protocol  = -1

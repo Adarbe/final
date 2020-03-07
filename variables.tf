@@ -4,35 +4,6 @@ variable "aws_region" {
       default = "us-east-1"
 }
 
-
-resource "tls_private_key" "servers" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-resource "aws_key_pair" "servers" {
-  key_name   = "servers"
-  public_key = "${tls_private_key.servers.public_key_openssh}"
-}
-
-resource "local_file" "servers" {
-sensitive_content = "${tls_private_key.servers.private_key_pem}"
-  filename           = "servers.pem"
-}
-resource "tls_private_key" "slave" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-resource "aws_key_pair" "slave" {
-  key_name   = "slave"
-  public_key = "${tls_private_key.slave.public_key_openssh}"
-}
-
-resource "local_file" "slave" {
-sensitive_content = "${tls_private_key.slave.private_key_pem}"
-  filename           = "slave.pem"
-}
-
-
 variable "pri_subnet" {
 	type = "list"
 	default = ["10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24"]
@@ -80,7 +51,4 @@ variable "jenkins_image_tag"{
   default = "latest"
 }
 
-variable "vpc_security_group_ids" {
-  description = "final default security group"
-  default = "default"
-}
+

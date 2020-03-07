@@ -9,22 +9,29 @@ locals {
 }
 
 
+resource "aws_key_pair" "jenkins_ec2_key" {
+  key_name = "terraform_ec2-1_key"
+  public_key = file("jenkins_ec2_key.pub")
+}
+
 
 resource "aws_instance" "jenkins_master" {
 # description = "create EC2 machine for jenkins master"
-
   ami = "ami-07d0cf3af28718ef8"
   instance_type = "t3.micro"
-  key_name = aws_key_pair.servers.key_name
+  key_name = aws_key_pair.jenkins_ec2_key.key_name
   tags = {
     Name = "Jenkins Master"
   }
-  vpc_security_group_ids =["${aws_default_security_group.default.id}","${aws_security_group.jenkins-final.id}"]
+  vpc_security_group_ids =["${aws_security_group.default.id}","${aws_security_group.jenkins-final.id}"]
+  subnet_id = "${aws_subnet.pubsub[1].id}"
   connection {
+    type = "ssh"
     host = aws_instance.jenkins_master.public_ip
     user = "ubuntu"
-    private_key = tls_private_key.servers.public_key_openssh
+    private_key = file("jenkins_ec2_key")
   }
+  
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get update -y",
@@ -34,11 +41,13 @@ resource "aws_instance" "jenkins_master" {
       "sudo usermod -aG docker ubuntu",
       "mkdir -p ${local.jenkins_home}",
       "sudo chown -R 1000:1000 ${local.jenkins_home}",
+      "mkdir -p "jenkinsubuntu"",
+      "sudo chown -R 1000:1000 jenkinsubuntu"
     ]
   }
   provisioner "file" {
     source = "/Users/adarb/projects/final/Dockerfile"
-    destination = "/home/ubuntu/Dockerfile" 
+    destination = "/home/jenkinsubuntu/Dockerfile" 
   }
   provisioner "file" {
     source = "/Users/adarb/projects/final/plugins.txt"
@@ -57,7 +66,7 @@ resource "aws_instance" "jenkins_slave" {
   count = 3
   ami = "ami-00068cd7555f543d5"
   instance_type = "t2.micro"
-  key_name = aws_key_pair.slave.key_name
+  key_name = aws_key_pair.jenkins_ec2_key.key_name
   tags = {
     Name = "jenkins_slave ${count.index}"
     Labels = "linux"
@@ -65,12 +74,12 @@ resource "aws_instance" "jenkins_slave" {
   connection {
     type = "ssh"
     host = "self.public_ip"
-    private_key = tls_private_key.slave.public_key_openssh
+    private_key = file("jenkins_ec2_key")
     user = "ec2-user"
   }
   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
   subnet_id = "${aws_subnet.pubsub[count.index].id}"
-  vpc_security_group_ids =["${aws_default_security_group.default.id}","${aws_security_group.jenkins-final.id}"]
+  vpc_security_group_ids =["${aws_security_group.default.id}","${aws_security_group.jenkins-final.id}"]
      user_data = <<-EOF
             #! /bin/bash
             sudo yum update -y
