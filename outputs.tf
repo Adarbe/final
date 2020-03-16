@@ -1,18 +1,24 @@
+###########################
 
-
-output "public_ip_jenkins_master"  {
+output "Jenkins_Master_Public_IP"  {
 value = "${aws_instance.jenkins_master.public_ip}"
 }
-
-output "private_ip" {
+output "Jenkins_Master_Private_IP"{
   value = "${aws_instance.jenkins_master.private_ip}"
 }
 
+###########################
 
-output "public_ip_jenkins_slave"  {
+output "Jenkins_Slave_Public_IP"  {
 value = "${aws_instance.jenkins_slave.*.public_ip}"
 }
-
-output "jenkins_slaves_private_IP" {
+output "Jenkins_Slaves_Private_IP" {
     value = "${aws_instance.jenkins_slave.*.private_ip}"
 }
+
+###########################
+
+output "Monitor_Server_Public_IP" {
+  value = "${aws_instance.monitor.*.public_ip}"
+}
+

@@ -10,21 +10,20 @@ resource "aws_internet_gateway" "final_IGW" {
 
 resource "aws_eip" "nateip" {
   vpc   = true
-  count = 3
+  count = "${length(var.pri_subnet)}"
 }
 
 resource "aws_nat_gateway" "final_NATGW" {
   count         = "${length(var.pri_subnet)}"
   allocation_id = "${element(aws_eip.nateip.*.id, count.index)}"
   subnet_id     = "${aws_subnet.pubsub[count.index].id}"
-  #  subnet_id = "${element(var.pri_subnet, count.index)}"
-  #  depends_on = "${aws_internet_gateway.final_IGW.id}"
   tags = {
-    Name = "final_NATGW ${count.index}"
+    Name = "final_NATGW ${count.index+1}"
   }
 }
 
 ######### Subnets ############
+
 resource "aws_subnet" "pubsub" {
   vpc_id                  = "${aws_vpc.final-project.id}"
   count                   = "${length(var.pub_subnet)}"
@@ -32,7 +31,7 @@ resource "aws_subnet" "pubsub" {
   availability_zone       = "${data.aws_availability_zones.available.names[count.index]}"
   map_public_ip_on_launch = true
   tags = {
-    Name = "pubsub ${count.index}"
+    Name = "pubsub ${count.index+1}"
   }
 }
 
@@ -43,7 +42,7 @@ resource "aws_subnet" "prisub" {
   availability_zone       = "${data.aws_availability_zones.available.names[count.index]}"
   map_public_ip_on_launch = true
   tags = {
-    Name = "prisub ${count.index}"
+    Name = "prisub ${count.index+1}"
   }
 }
 
@@ -79,3 +78,6 @@ resource "aws_route_table_association" "priroute" {
   subnet_id      = "${aws_subnet.prisub[count.index].id}"
   route_table_id = "${aws_route_table.priroute[count.index].id}"
 }
+
+
+
