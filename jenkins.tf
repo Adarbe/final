@@ -21,7 +21,7 @@ resource "aws_instance" "jenkins_master" {
   subnet_id = "${aws_subnet.pubsub[1].id}"
   connection {
     type = "ssh"
-    host = aws_instance.jenkins_master.public_ip
+    host = "${aws_instance.jenkins_master.public_ip}"
     user = "ubuntu"
     private_key = tls_private_key.servers_key.private_key_pem
   }
@@ -45,16 +45,11 @@ resource "aws_instance" "jenkins_master" {
     source = "/Users/adarb/projects/final/plugins.txt"
     destination = "/home/ubuntu/plugins.txt" 
   }
-//   provisioner "remote-exec" {
-//     inline = [
-//       "docker build -t myjenkinsfinal:01 .",
-//       "sudo docker run -d -p 8080:8080 -p 50000:50000 -v ${local.jenkins_home_mount} -v ${local.docker_sock_mount} --env ${local.java_opts} myjenkinsfinal:01"
-//    ]
-//   }
-// }
+
 provisioner "remote-exec" {
     inline = [
-      "sudo docker run -d -p 8080:8080 -p 50000:50000 -v ${local.jenkins_home_mount} -v ${local.docker_sock_mount} --env ${local.java_opts} jenkins:jenkins"
+      "docker build -t myjenkins:01 .",
+      "sudo docker run -d -p 8080:8080 -p 50000:50000 -v ${local.jenkins_home_mount} -v ${local.docker_sock_mount} --env ${local.java_opts} myjenkins:01"
    ]
   }
 }
@@ -68,12 +63,12 @@ resource "aws_instance" "jenkins_slave" {
   instance_type = "t2.micro"
   key_name = aws_key_pair.slaves_key.key_name
   tags = {
-   Name = "jenkins_slave-${count.index+1}"
+   Name = "jenkins_slave (count.index+1)"
    Labels = "linux"
   }
   connection {
     type = "ssh"
-    host = aws_instance.Jenkins_Slave.Public_IP
+    host = "self.public_ip"
     private_key = "${file("slaves_key.pem")}"
     user = "ec2-user"
   }
