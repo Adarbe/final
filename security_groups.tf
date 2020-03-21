@@ -1,6 +1,7 @@
 resource "aws_security_group" "default" {
   name = "default-final"
   vpc_id = "${aws_vpc.final-project.id}"
+  description = "default final-project "
   ingress {
     protocol  = -1
     self      = true
@@ -85,8 +86,9 @@ resource "aws_security_group" "ssh" {
   }
 }
 resource "aws_security_group" "jenkins-final" {
-  description = "Allow Jenkins inbound traffic"
+  name = "jenkins-final"
   vpc_id = "${aws_vpc.final-project.id}"
+  description = "Allow Jenkins inbound traffic"
   ingress {
     from_port = 443
     to_port = 443
@@ -127,8 +129,8 @@ resource "aws_security_group" "jenkins-final" {
 #Monitoring Security Group
 resource "aws_security_group" "monitor_sg" {
   name        = "monitor_sg_1"
+  vpc_id = "${aws_vpc.final-project.id}"
   description = "Security group for monitoring server"
-  vpc_id = "${aws_vpc.final-project.id}"  
   egress {
     from_port   = 0
     to_port     = 0

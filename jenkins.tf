@@ -7,6 +7,18 @@ locals {
   jenkins_master_url = "http://${aws_instance.jenkins_master.public_ip}:8080"
 }
 
+
+resource "tls_private_key" "jenkins_master" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_key_pair" "jenkins_master" {
+  key_name   = "jenkins_master"
+  public_key = "${tls_private_key.jenkins_master.public_key_openssh}"
+}
+
+
 resource "aws_instance" "jenkins_master" {
 #######################################################
 # description = "create EC2 machine for jenkins master"
@@ -58,23 +70,24 @@ resource "aws_instance" "jenkins_slave" {
 #########################################################
 # description = "create 3 EC2 machines for jenkins slave"
 #########################################################
-  count = 3
+  count = "${length(var.pub_subnet)}"
   ami = "ami-00068cd7555f543d5"
   instance_type = "t2.micro"
-  key_name = aws_key_pair.slaves_key.key_name
-  tags = {
-   Name = "jenkins_slave (count.index+1)"
-   Labels = "linux"
-  }
-  connection {
-    type = "ssh"
-    host = "self.public_ip"
-    private_key = "${file("slaves_key.pem")}"
-    user = "ec2-user"
-  }
+  key_name = "${var.default_slaves_keypair_name}"
+  associate_public_ip_address = true
   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
   subnet_id = "${aws_subnet.pubsub[count.index].id}"
   vpc_security_group_ids =["${aws_security_group.default.id}","${aws_security_group.jenkins-final.id}"]
+  tags = {
+    Name = "jenkins_slave-${count.index+1}"
+    Labels = "linux"
+  }
+  connection {
+    type = "ssh"
+    host = "${self.public_ip}"
+    private_key = "${file("slaves_key.pem")}"
+    user = "ec2-user"
+  }
   user_data = <<-EOF
             #! /bin/bash
             sudo yum update -y

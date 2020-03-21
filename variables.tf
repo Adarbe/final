@@ -6,6 +6,15 @@ variable "aws_region" {
       default = "us-east-1"
 }
 
+variable "default_servers_keypair_name" {
+  description = "Name of the KeyPair used for all nodes"
+  default = "servers_key"
+}  
+variable "default_slaves_keypair_name" {
+  description = "Name of the KeyPair used for all nodes"
+  default = "slaves_key"
+}
+
 ############### Networking ###############
 variable "pri_subnet" {
 	type = "list"
@@ -48,12 +57,10 @@ variable "jenkins_image_tag"{
   default = "latest"
 }
 
+
 ############### Monitoring ###############
 
-variable "default_keypair_name" {
-  description = "Name of the KeyPair used for all nodes"
-  default = "servers_key"
-}
+
 variable "monitor_instance_type" {
   default = "t3.small"
 }
@@ -62,4 +69,9 @@ variable "monitor_servers" {
 }
 variable "owner" {
   default = "Monitoring"
+}
+
+variable "default_keypair_name" {
+  description = "Name of the KeyPair used for all nodes"
+  default = "servers_key"
 }
