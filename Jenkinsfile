@@ -2,7 +2,7 @@
 // node {
 //   def app = ""
 //       stage("pull code") {
-// 	      repo = git "https://github.com/tsahiduek/flask-http.git"
+// 	      repo = git "https://github.com/spiral-project/ihatemoney.git"
 //       }
 //       stage('Docker build ') {
 // 	      app = docker.build("adarbe/mid_project:${repo.GIT_COMMIT}_${BUILD_NUMBER}")

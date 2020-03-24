@@ -4,7 +4,7 @@ resource "tls_private_key" "servers_key" {
 }
 
 resource "aws_key_pair" "servers_key" {
-  key_name = "server_key"
+  key_name = "servers_key"
   public_key = "${tls_private_key.servers_key.public_key_openssh}" 
 }
 

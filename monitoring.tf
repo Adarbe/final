@@ -18,22 +18,23 @@ resource "aws_instance" "monitor" {
   count         = "${var.monitor_servers}"
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "${var.monitor_instance_type}"
+
   subnet_id = "${aws_subnet.pubsub[2].id}"
-  vpc_security_group_ids = ["${aws_security_group.monitor_sg.id}"]
-  key_name = aws_key_pair.servers_key.key_name
+  vpc_security_group_ids = [aws_security_group.monitor_sg.id]
+  key_name               = "${var.default_keypair_name}"
   associate_public_ip_address = true
-  
+
   tags = {
     Owner = var.owner
-    Name  = "Monitor_Server-${count.index+1}"
+    Name  = "Monitor-${count.index+1}"
   }
-
-  connection {
+    connection {
     type = "ssh"
     host = aws_instance.monitor[count.index].public_ip
     user = "ubuntu"
     private_key = tls_private_key.servers_key.private_key_pem
   }
+  
   provisioner "file" {
     source      = "/Users/adarb/projects/final/monitoring"
     destination = "/home/ubuntu/"
@@ -41,7 +42,8 @@ resource "aws_instance" "monitor" {
 
   user_data = <<-EOF
         #! /bin/bash
-                sudo apt-get install update -y
+                sudo apt-get update -y
+                sleep 30
                 sudo chmod 777 /home/ubuntu/monitoring
                 chmod +x /home/ubuntu/monitoring/inst_docker.sh
                 chmod +x /home/ubuntu/monitoring/inst_node_exporter.sh
@@ -50,6 +52,6 @@ resource "aws_instance" "monitor" {
                 sudo chmod 666 /var/run/docker.sock
                 sudo chmod 666 /home/ubuntu/monitoring/node_exporter.service
                 cd /home/ubuntu/monitoring/compose && docker-compose down
-                cd /home/ubuntu/monitoring/compose && docker-compose up -d  
-EOF
+                cd /home/ubuntu/monitoring/compose && docker-compose up -d              
+                EOF
 }

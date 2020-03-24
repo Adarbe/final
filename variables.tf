@@ -3,26 +3,19 @@
 variable "AWS_ACCESS_KEY_ID" {}
 variable "AWS_SECRET_ACCESS_KEY" {}
 variable "aws_region" {
-      default = "us-east-1"
+  default = "us-east-1"
 }
 
-variable "default_servers_keypair_name" {
-  description = "Name of the KeyPair used for all nodes"
-  default = "servers_key"
-}  
-variable "default_slaves_keypair_name" {
-  description = "Name of the KeyPair used for all nodes"
-  default = "slaves_key"
-}
+
 
 ############### Networking ###############
 variable "pri_subnet" {
-	type = "list"
-	default = ["10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24"]
+  type    = "list"
+  default = ["10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24"]
 }
 variable "pub_subnet" {
-	type = "list"
-	default = ["10.0.20.0/24", "10.0.30.0/24", "10.0.40.0/24"]
+  type    = "list"
+  default = ["10.0.20.0/24", "10.0.30.0/24", "10.0.40.0/24"]
 }
 variable "network_address_space" {
   default = "10.0.0.0/16"
@@ -33,28 +26,36 @@ variable "azs" {
   default     = []
 }
 
+variable "servers_keypair_name" {
+  description = "Name of the KeyPair used for all nodes"
+  default     = "servers_key"
+}
+variable "slaves_keypair_name" {
+  description = "Name of the KeyPair used for all nodes"
+  default     = "slaves_key"
+}
 ############### Jenkins ###############
 
 variable "jenkins_master_port" {
   description = "The Port of the master jenkins instance"
-  default = 8080
+  default     = 8080
 }
 variable "plugins" {
   type        = list(string)
   description = "A list of Jenkins plugins to install, use short names."
-  default     = ["git", "pipeline", "SSH Slaves", "Build Monitor View","GreenBalls", "Blue Ocean", "Slack Notifications", "GitHub Plugin", "Kubernetes"]
+  default     = ["git", "pipeline", "SSH Slaves", "Build Monitor View", "GreenBalls", "Blue Ocean", "Slack Notifications", "GitHub Plugin", "Kubernetes"]
 }
 variable "jnlp_port" {
   description = "The Port to use for Jenkins master to slave communication bewtween instances"
   default     = 49187
 }
-variable "jenkins_image_name"{
+variable "jenkins_image_name" {
   description = "Jenkins image name"
-  default = "jenkins"
+  default     = "jenkins"
 }
-variable "jenkins_image_tag"{
+variable "jenkins_image_tag" {
   description = "jenkins image tag"
-  default = "latest"
+  default     = "latest"
 }
 
 
@@ -73,5 +74,5 @@ variable "owner" {
 
 variable "default_keypair_name" {
   description = "Name of the KeyPair used for all nodes"
-  default = "servers_key"
+  default     = "servers_key"
 }

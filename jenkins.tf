@@ -8,15 +8,6 @@ locals {
 }
 
 
-resource "tls_private_key" "jenkins_master" {
-  algorithm = "RSA"
-  rsa_bits  = 2048
-}
-
-resource "aws_key_pair" "jenkins_master" {
-  key_name   = "jenkins_master"
-  public_key = "${tls_private_key.jenkins_master.public_key_openssh}"
-}
 
 
 resource "aws_instance" "jenkins_master" {
@@ -34,8 +25,8 @@ resource "aws_instance" "jenkins_master" {
   connection {
     type = "ssh"
     host = "${aws_instance.jenkins_master.public_ip}"
+    private_key = "${tls_private_key.servers_key.private_key_pem}"
     user = "ubuntu"
-    private_key = tls_private_key.servers_key.private_key_pem
   }
   
   provisioner "remote-exec" {
@@ -70,10 +61,11 @@ resource "aws_instance" "jenkins_slave" {
 #########################################################
 # description = "create 3 EC2 machines for jenkins slave"
 #########################################################
-  count = "${length(var.pub_subnet)}"
+  count = 1
+  #count = "${length(var.pub_subnet)}"
   ami = "ami-00068cd7555f543d5"
   instance_type = "t2.micro"
-  key_name = "${var.default_slaves_keypair_name}"
+  key_name = "${var.servers_keypair_name}"
   associate_public_ip_address = true
   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
   subnet_id = "${aws_subnet.pubsub[count.index].id}"
@@ -84,23 +76,26 @@ resource "aws_instance" "jenkins_slave" {
   }
   connection {
     type = "ssh"
-    host = "${self.public_ip}"
-    private_key = "${file("slaves_key.pem")}"
+    host = "${aws_instance.jenkins_slave[count.index].public_ip}"
+    private_key = "${tls_private_key.servers_key.private_key_pem}"
     user = "ec2-user"
   }
+
   user_data = <<-EOF
-            #! /bin/bash
-            sudo yum update -y
-            sudo yum install java-1.8.0 -y
-            sudo alternatives --install /usr/bin/java java /usr/java/latest/bin/java 1 -y
-            sudo yum install docker git -y
-            sudo service docker start
-            sudo usermod -aG docker ec2-user
-            sudo chown -R jenkins:jenkins /var/lib/jenkins/
-            sudo yum install epel-release -y
-            sudo yum install python-pip -y
-            sudo pip install awscli
-            sudo yum install git -y
-            sudo chmod 777 /var/lib/jenkins/
-EOF
+      #! /bin/bash
+             sudo yum update -y
+             sudo yum install java-1.8.0 -y
+             sudo useradd -m -d /var/lib/jenkins/ jenkins
+             sudo chmod 777 /var/lib/jenkins/
+             sudo yum install docker git -y
+             sudo service docker start
+             sudo usermod -aG docker ec2-user
+             sudo chown -R jenkins:jenkins /var/lib/jenkins/
+             sudo yum install epel-release -y
+             sudo yum install python-pip -y
+             sudo pip install awscli
+             sudo yum install git -y
+             sudo chmod 777 /var/lib/jenkins/
+             EOF                 
 }
+ 
