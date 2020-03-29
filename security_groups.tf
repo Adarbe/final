@@ -85,6 +85,8 @@ resource "aws_security_group" "ssh" {
     Name = "ssh"
   }
 }
+
+#Jenkins Security Group
 resource "aws_security_group" "jenkins-final" {
   name = "jenkins-final"
   vpc_id = "${aws_vpc.final-project.id}"
@@ -123,8 +125,6 @@ resource "aws_security_group" "jenkins-final" {
     Name = "jenkins-final"
   }
 }
-
-
 
 #Monitoring Security Group
 resource "aws_security_group" "monitor_sg" {
@@ -167,6 +167,53 @@ resource "aws_security_group" "monitor_sg" {
   }
 }
 
+#Consul Security Group
+resource "aws_security_group" "final_consul" {
+  name        = "final-consul"
+  description = "Allow ssh & consul inbound traffic"
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
+    description = "Allow all inside security group"
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow ssh from the world"
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow http from the world"
+  }
+  ingress {
+    from_port   = 8500
+    to_port     = 8500
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow consul UI access from the world"
+  }
+  ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow prometheus UI access from the world"
+  }
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+    description     = "Allow all outside security group"
+  }
+}
 
 
 

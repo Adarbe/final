@@ -96,6 +96,7 @@ resource "aws_instance" "jenkins_slave" {
              sudo pip install awscli
              sudo yum install git -y
              sudo chmod 777 /var/lib/jenkins/
+             sudo java -jar agent.jar -jnlpUrl http://Jenkins_Master-1:8080/computer/jenkins_slave-${count.index+1}/slave-agent.jnlp
              EOF                 
 }
  
